@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1, min-scale=1, max-scale=2.5">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Spoken Text</title>
+</head>
+<body>
+    <div class="full-page">
+        <form action="">
+
+            <label for="voiceSelect">Voice Selector</label>
+            <select name="voiceSelect" id="voiceSelect"></select>
+            
+            <label for="rate">Rate</label>
+            <input type="range" name="rate" id="rate" min=".1" max="3" value="1" step=".1">
+
+            <label for="pitch">Pitch</label>
+            <input type="range" name="pitch" id="pitch" min="0" max="3" value="1" step=".1">
+
+            <label for="inputTxt">Input your text below</label>
+            <textarea name="inputTxt" id="txt" class="txt" cols="30" rows="10">Hello I Love JavaScript!</textarea>
+
+            <button type="submit">Speak the Text</button>
+            <button id="pause">Pause Speech</button>
+        </form>
+    </div>
+
+    <script>
+    var synth = window.speechSynthesis;
+
+    var inputForm = document.querySelector('form');
+    var inputTxt = document.querySelector('.txt');
+    var voiceSelect = document.querySelector('select');
+
+    var pitch = document.querySelector('#pitch');
+    var pitchValue = document.querySelector('.pitch-value');
+    var rate = document.querySelector('#rate');
+    var rateValue = document.querySelector('.rate-value');
+
+    var pauseButton = document.querySelector('#pause');
+
+    var voices = [];
+
+    function populateVoiceList() {
+    voices = synth.getVoices();
+
+    for(i = 0; i < voices.length ; i++) {
+        var option = document.createElement('option');
+        option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+        
+        if(voices[i].default) {
+        option.textContent += ' -- DEFAULT';
+        }
+
+        option.setAttribute('data-lang', voices[i].lang);
+        option.setAttribute('data-name', voices[i].name);
+        voiceSelect.appendChild(option);
+    }
+    }
+
+    populateVoiceList();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = populateVoiceList;
+    }
+
+    inputForm.onsubmit = function(event) {
+    event.preventDefault();
+
+    var utterThis = new SpeechSynthesisUtterance(inputTxt.value);
+    var selectedOption = voiceSelect.selectedOptions[0].getAttribute('data-name');
+    for(i = 0; i < voices.length ; i++) {
+        if(voices[i].name === selectedOption) {
+        utterThis.voice = voices[i];
+        }
+    }
+    utterThis.pitch = pitch.value;
+    utterThis.rate = rate.value;
+    synth.speak(utterThis);
+
+    inputTxt.blur();
+    }
+
+    pauseButton.addEventListener('click', speechSynthesis.pause(utterThis));
+    </script>
+</body>
+</html>
